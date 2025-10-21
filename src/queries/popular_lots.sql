@@ -1,7 +1,8 @@
 WITH cte AS (
   SELECT
     l.buyer_type, f.mbr_state, l.lot_make_cd, l.grp_model,COUNT(*) AS cnt,
-    APPROX_QUANTILES(l.acv, 2)[OFFSET(1)] AS median_acv, APPROX_QUANTILES(l.repair_cost, 2)[OFFSET(1)] AS median_repair_cost
+    APPROX_QUANTILES(l.acv, 2)[OFFSET(1)] AS median_acv, APPROX_QUANTILES(l.plug_lot_acv, 2)[OFFSET(1)] AS median_plug_lot_acv,
+    APPROX_QUANTILES(l.repair_cost, 2)[OFFSET(1)] AS median_repair_cost
   FROM `cprtpr-dataplatform-sp1`.usviews.v_us_member_fact f
   LEFT JOIN `cprtpr-dataplatform-sp1`.usviews.v_us_lot_fact l
     ON f.mbr_nbr = l.buyer_nbr
