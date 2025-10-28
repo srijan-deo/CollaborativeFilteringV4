@@ -8,7 +8,7 @@ import pandas as pd
 
 def generate_final_recommendations(data, popular_lots_top6):
 
-    data = data[['mbr_lic_type','mbr_state','buyer_nbr','mbr_email']]
+    #data = data[['mbr_lic_type','mbr_state','buyer_nbr','mbr_email']]
 
     if 'mbr_lic_type' in data.columns:
         data = data.rename(columns={'mbr_lic_type': 'buyer_type'})

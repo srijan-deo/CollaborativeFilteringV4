@@ -12,7 +12,7 @@ from src.model.popular_logic import (
     match_recommendations_fast,
     save_processed_data as save_popular_data
 )
-from src.merger.data_merging import rename_tag_concat_and_pivot, save_processed_data as save_merged_data
+from src.merger.data_merging import rename_tag_concat_and_pivot, upload_to_bigquery, save_processed_data as save_merged_data
 
 def log_time(step_name, start_time):
     duration = time.time() - start_time
@@ -127,6 +127,12 @@ def main():
         pd.read_excel("data/results/onetoone_holdout_would_have_reco.xlsx")
     )
     save_merged_data(final_pivoted)
+    upload_to_bigquery(
+        dataframe=final_pivoted,
+        table_id="member_reco.test",
+        project_id="cprtqa-strategicanalytics-sp1",
+        credentials_path="/Users/srdeo/OneDrive - Copart, Inc/cprtqa-strategicanalytics-sp1-8b7a00c4fbae.json"
+    )
     log_time(step, start)
 
     # ───────────────────────────────────────────────────────────────

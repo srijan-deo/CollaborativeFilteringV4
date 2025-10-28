@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from datetime import datetime, timedelta
 import pytz
+from google.cloud import bigquery
 
 def rename_tag_concat_and_pivot(
     cf_test_reco,
@@ -147,10 +148,41 @@ def save_processed_data(df: pd.DataFrame):
     # Ensure folder exists
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
+    for col in df.select_dtypes(include=['datetimetz']).columns:
+        df[col] = df[col].dt.tz_localize(None)
+
     # Save DataFrame
     df.to_excel(file_path, index=False)
 
     print(f"✅ File saved successfully as: {file_path}")
+
+
+# ==============================================================
+# Upload merged recommendations to BigQuery
+# ==============================================================
+def upload_to_bigquery(dataframe, table_id, project_id, credentials_path):
+
+    print(f"\n📤 Uploading data to BigQuery table `{table_id}`...")
+
+    # Initialize BigQuery client
+    client = bigquery.Client.from_service_account_json(credentials_path)
+
+    # Define job configuration (append mode + schema autodetect)
+    job_config = bigquery.LoadJobConfig(
+        write_disposition="WRITE_APPEND",
+        autodetect=True
+    )
+
+    # Start upload job
+    job = client.load_table_from_dataframe(
+        dataframe,
+        destination=f"{project_id}.{table_id}",
+        job_config=job_config
+    )
+
+    job.result()  # Wait for load to complete
+
+    print(f"✅ Data successfully appended to `{table_id}` in project `{project_id}`.")
 
 
 def main():
@@ -158,18 +190,25 @@ def main():
         one_to_one_holdout_reco, nonactive_holdout_reco, cf_holdout_would_have, one_to_one_holdout_would_have)
 
 if __name__ == "__main__":
-    cf_test_reco = pd.read_excel('../data/results/cf_test_reco.xlsx')
-    one_to_one_test_reco = pd.read_excel('../data/results/onetoone_test_reco.xlsx')
-    nonactive_test_reco = pd.read_excel('../data/results/nonactive_test_reco.xlsx')
+    cf_test_reco = pd.read_excel('../../data/results/cf_test_reco.xlsx')
+    one_to_one_test_reco = pd.read_excel('../../data/results/onetoone_test_reco.xlsx')
+    nonactive_test_reco = pd.read_excel('../../data/results/nonactive_test_reco.xlsx')
 
-    cf_holdout_reco = pd.read_excel('../data/results/cf_holdout_reco.xlsx')
-    one_to_one_holdout_reco = pd.read_excel('../data/results/onetoone_holdout_reco.xlsx')
-    nonactive_holdout_reco = pd.read_excel('../data/results/nonactive_holdout_reco.xlsx')
+    cf_holdout_reco = pd.read_excel('../../data/results/cf_holdout_reco.xlsx')
+    one_to_one_holdout_reco = pd.read_excel('../../data/results/onetoone_holdout_reco.xlsx')
+    nonactive_holdout_reco = pd.read_excel('../../data/results/nonactive_holdout_reco.xlsx')
 
-    cf_holdout_would_have = pd.read_excel('../data/results/cf_holdout_would_have_reco.xlsx')
-    one_to_one_holdout_would_have = pd.read_excel('../data/results/onetoone_holdout_would_have_reco.xlsx')
+    cf_holdout_would_have = pd.read_excel('../../data/results/cf_holdout_would_have_reco.xlsx')
+    one_to_one_holdout_would_have = pd.read_excel('../../data/results/onetoone_holdout_would_have_reco.xlsx')
     final_pivoted_recos = rename_tag_concat_and_pivot(cf_test_reco, one_to_one_test_reco, nonactive_test_reco, cf_holdout_reco,
                                 one_to_one_holdout_reco, nonactive_holdout_reco, cf_holdout_would_have,
                                 one_to_one_holdout_would_have)
 
-    save_processed_data(final_pivoted_recos, 'data/results/final_recos.xlsx')
+    save_processed_data(final_pivoted_recos)
+
+    upload_to_bigquery(
+        dataframe=final_pivoted_recos,
+        table_id="member_reco.test",
+        project_id="cprtqa-strategicanalytics-sp1",
+        credentials_path="/Users/srdeo/OneDrive - Copart, Inc/secrets/cprtqa-strategicanalytics-sp1-8b7a00c4fbae.json"
+    )
