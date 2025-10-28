@@ -8,9 +8,10 @@ WITH cte AS (
     ON f.mbr_nbr = l.buyer_nbr
   WHERE f.mbr_mbrshp_type_cd IN ('BASIC', 'PREMIER')
     AND f.mbr_status = 'A' AND f.mbr_country = 'USA' AND f.mbr_site_status_cd = 'A'
-    AND l.inv_dt BETWEEN '2025-07-13' and '2025-10-13'
+    AND l.inv_dt BETWEEN '2025-10-07' and '2025-10-13'
     AND l.lot_year >= 2017
     AND l.lot_type_cd = 'V' AND l.yard_country_cd = 'USA'
+  and mbr_lang_pref = 'en'
   GROUP BY l.buyer_type, f.mbr_state, l.lot_make_cd, l.grp_model
 ),
 

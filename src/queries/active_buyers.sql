@@ -6,7 +6,7 @@ join `cprtpr-dataplatform-sp1`.usviews.v_us_lot_fact l
 on b.lot_nbr = l.lot_nbr
 join `cprtpr-dataplatform-sp1`.usviews.v_us_member_fact f
 on f.mbr_nbr = b.buyer_nbr
-where l.inv_dt between '2025-07-13' and '2025-10-13'
+where l.inv_dt between '2025-10-07' and '2025-10-13'
 and lot_type_cd = 'V' and yard_country_cd = 'USA'
 and mbr_country = 'USA' AND mbr_mbrshp_type_cd IN ('BASIC', 'PREMIER')
   AND mbr_site_status_cd = 'A'
@@ -30,4 +30,4 @@ lots_bid_counts as (
  left join buyers_bid_counts as bb on f.buyer_nbr = bb.buyer_nbr
  GROUP BY
     f.mbr_lic_type, f.mbr_state, f.lot_nbr, f.buyer_nbr, f.mbr_email, f.inv_dt, f.lot_year, f.lot_make_cd, f.grp_model,
-    f.acv, f.plug_lot_acv,f.repair_cost, lb.total_unique_buyers_on_that_lot, bb.total_unique_lots_bid_by_buyers limit 5000
+    f.acv, f.plug_lot_acv,f.repair_cost, lb.total_unique_buyers_on_that_lot, bb.total_unique_lots_bid_by_buyers
