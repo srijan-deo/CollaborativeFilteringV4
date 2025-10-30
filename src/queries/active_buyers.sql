@@ -6,7 +6,7 @@ join `cprtpr-dataplatform-sp1`.usviews.v_us_lot_fact l
 on b.lot_nbr = l.lot_nbr
 join `cprtpr-dataplatform-sp1`.usviews.v_us_member_fact f
 on f.mbr_nbr = b.buyer_nbr
-where l.inv_dt between DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) and CURRENT_DATE()
+where l.inv_dt between DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY) and CURRENT_DATE()
 and lot_type_cd = 'V' and yard_country_cd = 'USA'
 and mbr_country = 'USA' AND mbr_mbrshp_type_cd IN ('BASIC', 'PREMIER')
   AND mbr_site_status_cd = 'A'
